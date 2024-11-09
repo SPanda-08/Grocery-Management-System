@@ -3,7 +3,9 @@
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,20 +14,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class AddProduct
+ * Servlet implementation class groceryServlet
  */
-@WebServlet("/AddProduct")
-public class AddProduct extends HttpServlet {
+@WebServlet("/groceryServlet")
+public class groceryServlet extends HttpServlet {	
 	private static final long serialVersionUID = 1L;
 	private static final String URL = "jdbc:sqlite:C:\\Users\\HP\\MySQLiteDB";
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     java.sql.Connection conn;
+       
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public AddProduct() {
+    public groceryServlet() {
         super();
-        // TODO Auto-generated constructor stub
         try {
 			Class.forName(JDBC_DRIVER);
 			conn = DriverManager.getConnection(URL);
@@ -44,30 +46,43 @@ public class AddProduct extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		String pname = request.getParameter("pname");
-		String desc = request.getParameter("desc");
-		String img = request.getParameter("img");
-		//request.getParameter("") returns a string so we need to use parseInt to typecast it into int 
-		int cat = Integer.parseInt(request.getParameter("cat"));
-		double price = Double.parseDouble(request.getParameter("price"));
-		//System.out.println(pname+","+desc+","+img+","+cat+","+price);
-		String sql = "INSERT INTO product_details (product_name, prod_img, product_desc, product_price, cat_id) VALUES (?, ?, ?, ?, ?)";
 		try {
-			//PreparedStatement-can have an sql query and can be executed any number of times(one instance created and reused)
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, pname);
-			pstmt.setString(2, img);
-			pstmt.setString(3, desc);
-			pstmt.setDouble(4, price);
-			pstmt.setInt(5, cat);
-			pstmt.executeUpdate();
-			pstmt.close();
+			String name = request.getParameter("name");
+			String email = request.getParameter("email");
+			String phone = request.getParameter("phone");
+			String address = request.getParameter("address");
+			int id = Integer.parseInt(request.getParameter("id"));
+			int quantity = Integer.parseInt(request.getParameter("quantity"));
+			
+			String query = "INSERT INTO customer_details (Name, Phone_No, Email_ID, Address) VALUES (?, ?, ?, ?)";
+			
+			String query1 = "INSERT INTO order_details (quantity, prod_ID, cust_ID) VALUES (?, ?, ?)";
+			PreparedStatement ps = conn.prepareStatement(query,  Statement.RETURN_GENERATED_KEYS);
+			
+			ps.setString(1, name);
+			ps.setString(2, phone);
+			ps.setString(3, email);
+			ps.setString(4, address);
+			
+			ps.executeUpdate();
+			ps.close();
+			ResultSet rs = ps.getGeneratedKeys();
+			rs.next();
+			int auto_id = rs.getInt(1);
+			rs.close();
+			PreparedStatement ps2 = conn.prepareStatement(query1);
+			ps2.setInt(1, quantity);
+			ps2.setInt(2, id);
+			ps2.setInt(3, auto_id);
+			ps2.executeUpdate();
+			ps2.close();
 			//conn.close();
-		} catch (SQLException e) {
+			response.sendRedirect("Thankyou.html");
+		}
+		catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		response.sendRedirect("adminPage.jsp?select=1");
 	}
 
 	/**

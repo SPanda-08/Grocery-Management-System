@@ -12,18 +12,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Servlet implementation class AddProduct
+ * Servlet implementation class DeleteItem
  */
-@WebServlet("/AddProduct")
-public class AddProduct extends HttpServlet {
+@WebServlet("/DeleteItem")
+public class DeleteItem extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String URL = "jdbc:sqlite:C:\\Users\\HP\\MySQLiteDB";
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     java.sql.Connection conn;
+       
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public AddProduct() {
+    public DeleteItem() {
         super();
         // TODO Auto-generated constructor stub
         try {
@@ -36,7 +37,7 @@ public class AddProduct extends HttpServlet {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        // TODO Auto-generated constructor stub
+       
     }
 
 	/**
@@ -44,30 +45,51 @@ public class AddProduct extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		String pname = request.getParameter("pname");
-		String desc = request.getParameter("desc");
-		String img = request.getParameter("img");
-		//request.getParameter("") returns a string so we need to use parseInt to typecast it into int 
-		int cat = Integer.parseInt(request.getParameter("cat"));
-		double price = Double.parseDouble(request.getParameter("price"));
-		//System.out.println(pname+","+desc+","+img+","+cat+","+price);
-		String sql = "INSERT INTO product_details (product_name, prod_img, product_desc, product_price, cat_id) VALUES (?, ?, ?, ?, ?)";
-		try {
-			//PreparedStatement-can have an sql query and can be executed any number of times(one instance created and reused)
-			PreparedStatement pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, pname);
-			pstmt.setString(2, img);
-			pstmt.setString(3, desc);
-			pstmt.setDouble(4, price);
-			pstmt.setInt(5, cat);
-			pstmt.executeUpdate();
-			pstmt.close();
-			//conn.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		//response.getWriter().append("Served at: ").append(request.getContextPath());
+		int id = Integer.parseInt(request.getParameter("id"));
+		String type = request.getParameter("type");
+		if(type.equals("1")) {
+				String query = "DELETE FROM product_details WHERE product_details.product_id=?";
+				try {
+					PreparedStatement pt = conn.prepareStatement(query);
+					pt.setInt(1, id);
+					pt.executeUpdate();
+					pt.close();
+					
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
-		response.sendRedirect("adminPage.jsp?select=1");
+		
+		else if(type.equals("2")) {
+			String query = "DELETE FROM customer_details WHERE customer_details.Customer_ID = ?";
+			try {
+				PreparedStatement pt = conn.prepareStatement(query);
+				pt.setInt(1, id);
+				pt.executeUpdate();
+				pt.close();
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		else if(type.equals("3")) {
+			String query = "DELETE FROM order_details WHERE order_details.order_no = ?";
+			try {
+				PreparedStatement pt = conn.prepareStatement(query);
+				pt.setInt(1, id);
+				pt.executeUpdate();
+				pt.close();
+				
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		response.sendRedirect("adminPage.jsp");
 	}
 
 	/**
